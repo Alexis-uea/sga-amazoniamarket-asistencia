@@ -1,0 +1,27 @@
+# Nombre visible en la pestaña Actions
+name: CI SGA-AmazoniaMarket
+
+# Disparadores: corre en cada push y en cada pull request
+on: [push, pull_request]
+
+jobs:
+  build:
+    # Máquina virtual Ubuntu que GitHub provee gratis
+    runs-on: ubuntu-latest
+    steps:
+      # Descarga el código del repositorio
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      # Instala Python 3.12 en la máquina virtual
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Verifica que todo el código fuente compile (sintaxis válida)
+      - name: Verificar sintaxis del código
+        run: python -m compileall src/
+
+      # Semana 12: aquí se agregarán
+      #   pip install -r requirements.txt && pytest
