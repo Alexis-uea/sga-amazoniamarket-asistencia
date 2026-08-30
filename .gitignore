@@ -1,0 +1,25 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# --- Entornos virtuales ---
+venv/
+.venv/
+
+# --- Django (preparado para el futuro) ---
+db.sqlite3
+db.sqlite3-journal
+/media/
+/staticfiles/
+*.log
+
+# --- Secretos: NUNCA subirse (RNF-01) ---
+.env
+local_settings.py
+
+# --- IDEs y sistema operativo ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
