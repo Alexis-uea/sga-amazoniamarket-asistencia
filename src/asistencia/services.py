@@ -1,43 +1,40 @@
-"""Servicios del módulo de Registro de Asistencia — RF-01 y RF-02."""
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
-
+from django.utils import timezone  # <-- Agregar esta importación
 from .models import RegistroAsistencia
-
 
 class DuplicadoError(Exception):
     """Se intentó registrar una segunda entrada en la misma jornada (AS-16)."""
 
-
 def registrar_entrada(empleado, momento):
-    """Registra la hora de entrada de un empleado (RF-01)."""
     if empleado is None or empleado.pk is None:
         raise ValueError("empleado_id inválido")
+    
+    # Extraemos la fecha local basada en la zona horaria de Django
+    fecha_local = timezone.localdate(momento) 
+    
     try:
-        with transaction.atomic():  # aísla el fallo sin envenenar la transacción
+        with transaction.atomic():
             return RegistroAsistencia.objects.create(
                 empleado=empleado,
-                fecha=momento.date(),
+                fecha=fecha_local,  # <-- Usar fecha alineada
                 hora_entrada=momento,
             )
     except IntegrityError as exc:
-        raise DuplicadoError(
-            "Ya existe una entrada para este empleado en la jornada"
-        ) from exc
-
+        raise DuplicadoError("Ya existe una entrada para este empleado en la jornada") from exc
 
 def registrar_salida(empleado, momento):
-    """Registra la salida. Regla AS-16: sin entrada previa no hay salida,
-    y no se admite una segunda salida en la misma jornada."""
     if empleado is None or empleado.pk is None:
         raise ValueError("empleado_id inválido")
-    registro = RegistroAsistencia.objects.filter(
-        empleado=empleado, fecha=momento.date()
-    ).first()
+    
+    fecha_local = timezone.localdate(momento)
+    registro = RegistroAsistencia.objects.filter(empleado=empleado, fecha=fecha_local).first()
+    
     if registro is None:
         raise ValidationError("No existe una entrada previa para esta jornada")
     if registro.hora_salida is not None:
         raise ValidationError("La salida de esta jornada ya fue registrada")
+    
     registro.hora_salida = momento
     registro.estado = RegistroAsistencia.Estado.COMPLETADO
     registro.save()
