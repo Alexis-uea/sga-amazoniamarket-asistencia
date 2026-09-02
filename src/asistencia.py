@@ -1,21 +1,17 @@
-"""
-Módulo de Registro de Asistencia — SGA-AmazoniaMarket (Grupo 12).
+"""Módulo de Registro de Asistencia — SGA-AmazoniaMarket (RF-01, RF-02).
 
-Borrador del primer incremento (RF-01): cálculo de horas trabajadas
-entre la hora de entrada y la hora de salida.
+Semilla inicial; en próximas semanas se integrará a la app Django.
 """
-
 from datetime import datetime
 
-FORMATO_HORA = "%H:%M"
+
+def registrar_entrada(empleado_id: int, momento: datetime) -> dict:
+    """Registra la hora de entrada de un empleado (RF-01)."""
+    if empleado_id <= 0:
+        raise ValueError("empleado_id inválido")
+    return {"empleado": empleado_id, "entrada": momento, "salida": None}
 
 
-def calcular_horas_trabajadas(hora_entrada: str, hora_salida: str) -> float:
-    """Calcula las horas trabajadas en una jornada.
-
-    >>> calcular_horas_trabajadas("08:00", "17:00")
-    9.0
-    """
-    entrada = datetime.strptime(hora_entrada, FORMATO_HORA)
-    salida = datetime.strptime(hora_salida, FORMATO_HORA)
-    return round((salida - entrada).total_seconds() / 3600, 2)
+def validar_salida(registro: dict | None) -> bool:
+    """Una salida solo es válida si existe entrada previa y no hay salida duplicada (AS-16)."""
+    return registro is not None and registro.get("salida") is None
